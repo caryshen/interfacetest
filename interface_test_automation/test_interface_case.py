@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import unittest
-
+import re
 
 def update_result(self,id,param,result,reason):
     try:
@@ -13,6 +13,17 @@ def update_result(self,id,param,result,reason):
     except Exception as e:
         print('%s' % e)
         self.db1_cursor.execute('rollback')
+
+def judge_error(self,response,result,id):
+      if {} == response:
+            self.test_data.result = 'Error'
+            try:
+                self.cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s' ,(result, id))
+                self.cursor.execute('commit')
+            except Exception as e:
+                print('%s' % e)
+                self.cursor.execute('rollback')
+            return
 
 # 测试用例(组)类
 class ParametrizedTestCase(unittest.TestCase):
@@ -1059,7 +1070,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                 return
             try:
                 assert response['returnStatus']['status'] == '0','返回code不等于0'
-                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
                 assert response['returnStatus']['error'] == "",'失败原因不为空'
                 assert response['data']['schemeList']!="",'schemeList出问题啦！！'
                 self.test_data.result = 'Pass'
@@ -1091,7 +1102,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                 return
             try:
                 assert response['returnStatus']['status'] == '0','返回code不等于0'
-                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
                 assert response['returnStatus']['error'] == "",'失败原因不为空'
                 assert response['data']['schemeList']!="",'schemeList出问题啦！！'
                 self.test_data.result = 'Pass'
@@ -1123,7 +1134,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                 return
             try:
                 assert response['returnStatus']['status'] == '0','返回status不等于0'
-                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
                 assert response['returnStatus']['error'] == "",'失败原因不为空'
                 assert response['data']!="",'data出问题啦！！'
                 self.test_data.result = 'Pass'
@@ -1155,7 +1166,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                 return
             try:
                 assert response['returnStatus']['status'] == '0','返回status不等于0'
-                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
                 assert response['returnStatus']['error'] == "",'失败原因不为空'
                 assert response['data']!="",'data出问题啦！！'
                 self.test_data.result = 'Pass'
@@ -1187,7 +1198,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                 return
             try:
                 assert response['returnStatus']['status'] == '0','返回status不等于0'
-                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
                 assert response['returnStatus']['error'] == "",'失败原因不为空'
                 assert response['data']['caseList']!="",'data出问题啦！！'
                 self.test_data.result = 'Pass'
@@ -1220,7 +1231,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                 return
             try:
                 assert response['returnStatus']['status'] == '0','返回status不等于0'
-                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
                 assert response['returnStatus']['error'] == "",'失败原因不为空'
                 assert response['data']['productList']!="",'data出问题啦！！'
                 self.test_data.result = 'Pass'
@@ -1254,7 +1265,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                 return
             try:
                 assert response['returnStatus']['status'] == '0','返回status不等于0'
-                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
                 assert response['returnStatus']['error'] == "",'失败原因不为空'
                 assert response['data']=="",'data出问题啦！！'
                 self.test_data.result = 'Pass'
@@ -1270,6 +1281,618 @@ class TestInterfaceCase(ParametrizedTestCase):
             self.test_data.result = 'Error'
             self.test_data.reason = '%s' %e2
         update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+################11、	购物清单
+    def test_cartlist(self):
+        try:
+            testrq='{\"page\":\"1\",\"size\":\"5\",\"state\":\"-1\",\"access_token\":\"%s\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            global TESTGOODID,TESTID
+            TESTGOODID = re.findall("\'id\': (\d+)", str(response))
+            TESTID=TESTGOODID[0]
+
+            print(TESTGOODID)
+            if {} == response:
+                self.test_data.result = 'Error'
+                try:
+                    self.cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s' ,(self.test_data.result, self.test_data.case_id))
+                    self.cursor.execute('commit')
+                except Exception as e:
+                    print('%s' %e)
+                    self.cursor.execute('rollback')
+                return
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']['storeList']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+
+    ###############10、	从购物车删除商品
+
+    def test_cartdelete(self):
+        try:
+            testrq='{\"itemId\":\"%s\",\"access_token\":\"%s\"}' %(int(TESTID),TESTTOKEN)
+            response = self.http.post(self.test_data.request_url, testrq)
+            print(response)
+            if {} == response:
+                self.test_data.result = 'Error'
+                try:
+                    self.cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s' ,(self.test_data.result, self.test_data.case_id))
+                    self.cursor.execute('commit')
+                except Exception as e:
+                    print('%s' %e)
+                    self.cursor.execute('rollback')
+                return
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+        try:
+            for t in TESTGOODID:
+                testrq='{\"itemId\":\"%s\",\"access_token\":\"%s\"}' %(t,TESTTOKEN)
+                response = self.http.post(self.test_data.request_url, testrq)
+        except Exception as e3:
+            print('errorrrrrrrrrrrrrr')
+
+
+    ###12、	预约商家：###########
+    def test_reserve(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"storeNo\":\"M00210058001\",\"schemeNo\":\"C160329012\"}' %TESTTOKEN
+            response = self.http.post(self.test_data.request_url, testrq)
+            print(response)
+            if {} == response:
+                self.test_data.result = 'Error'
+                try:
+                    self.cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s' ,(self.test_data.result, self.test_data.case_id))
+                    self.cursor.execute('commit')
+                except Exception as e:
+                    print('%s' %e)
+                    self.cursor.execute('rollback')
+                return
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] != "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+##########13、	方案评论：##########
+    def test_commentadd(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"userNo\":\"%s\",\"schemeNo\":\"C160329012\",\"replyId\":\"0\",\"p\":\"0\"' \
+                   ',\"comment\":\"测试评论\",\"casePicId\":\"1048\"}' %(TESTTOKEN,TESTUSERNO)
+            response = self.http.post(self.test_data.request_url, testrq)
+            if {} == response:
+                self.test_data.result = 'Error'
+                try:
+                    self.cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s' ,(self.test_data.result, self.test_data.case_id))
+                    self.cursor.execute('commit')
+                except Exception as e:
+                    print('%s' %e)
+                    self.cursor.execute('rollback')
+                return
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] != "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+
+##########14、	方案公开评论列表：##########
+    def test_commentlist(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"casePicId\":\"1048\",\"page\":\"1\",\"size\":\"5\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']['commentList']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+
+##########15、	方案私密评论列表
+    def test_commentlist(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"casePicId\":\"1048\",\"page\":\"1\",\"size\":\"5\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']['commentList']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+######16、	删除评论###
+    def test_commentdelete(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"id\":\"329\"}' %TESTTOKEN
+            response = self.http.post(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+######17、	读评论：###
+    def test_commentread(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"id\":\"330\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###18、	点赞方案
+    def test_schemepraise(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"casePicId\":\"1140\",\"chemeNo\":\"C160331002\"}' %TESTTOKEN
+            response = self.http.post(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###19、	取消点赞
+    def test_raisecancel(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"casePicId\":\"1140\",\"chemeNo\":\"C160331002\"}' %TESTTOKEN
+            response = self.http.post(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###20、	分享
+    def test_schemeshare(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"casePicId\":\"1140\",\"platform\":\"qq\",\"schemeNo\":\"C160331002\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###21、	收藏方案（方案中的图片）：
+    def test_schemecollection(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"casePicId\":\"1140\",\"schemeNo\":\"C160331002\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###22、	取消方案收藏：
+    def test_collectioncancel(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"casePicId\":\"1140\",\"schemeNo\":\"C160331002\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+#####23、	清除购物车
+    def test_cartclear(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"storeNo\":\"M00210058001\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']=="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+
+########三、	个人中心：
+###1、	获取个人基本信息
+    def test_personal_info(self):
+        try:
+            testrq='{\"access_token\":\"%s\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url,  self.test_data.request_param)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == "0",'返回code不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode为空'
+                assert response['returnStatus']['error'] == "",'error为空'
+                assert response['data'] != "",'data不为空'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+##2、	收藏的方案总数:
+    def test_collection(self):
+        try:
+            testrq='{\"access_token\":\"%s\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+##3、	收藏的方案列表:
+    def test_collectionlist(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"page\":\"1\",\"size\":\"10\",\"vm\":\"1\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+####4、	未读消息
+    def test_messagenoread(self):
+        try:
+            testrq='{\"access_token\":\"%s\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###5、	未读系统消息
+    def test_sysmessagenoread(self):
+        try:
+            testrq='{\"access_token\":\"%s\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###6、	个人详细信息
+    def test_userinfodetail(self):
+        try:
+            testrq='{\"access_token\":\"%s\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+####7、	设计师作品列表：
+    def test_designerproduction(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"designerNo\":\"151201120001\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+###8、	设计师作品总数
+    def test_designerproductionnum(self):
+        try:
+            testrq='{\"access_token\":\"%s\",\"page\":\"1\",\"size\":\"5\",\"designerNo\":\"151201120001\"}' %TESTTOKEN
+            response = self.http.get(self.test_data.request_url, testrq)
+            judge_error(self,response,self.test_data.result,self.test_data.case_id)
+            try:
+                assert response['returnStatus']['status'] == '0','返回status不等于0'
+                assert response['returnStatus']['errorCode'] == "",'errorCode不为空'
+                assert response['returnStatus']['error'] == "",'失败原因不为空'
+                assert response['data']!="",'data出问题啦！！'
+                self.test_data.result = 'Pass'
+            except AssertionError as e:
+                print('%s' %e)
+                self.test_data.result = 'Fail'
+                self.test_data.reason = '%s' %e  # 记录失败原因
+            except AttributeError as e1:
+                print('%s' %e1)
+                self.test_data.result = 'Error'
+                self.test_data.reason = '%s' %e1  # 记录失败原因
+        except Exception as e2:
+            self.test_data.result = 'Error'
+            self.test_data.reason = '%s' %e2
+        update_result(self,self.test_data.case_id,self.test_data.request_param,self.test_data.result,self.test_data.reason)
+
+
+
+
+
+
+
+
+
 
 
 
